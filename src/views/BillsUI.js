@@ -20,6 +20,12 @@ const row = (bill) => {
   }
 
 const rows = (data) => {
+
+  // *** for Bills.js tests to pass
+  if (!Array.isArray(data)) return ""
+  data.sort((a, b) => new Date(b.date) - new Date(a.date))
+  // **********
+  
   return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
 }
 
