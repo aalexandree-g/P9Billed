@@ -145,7 +145,8 @@ export default class {
       this.counter ++
     }
 
-    bills.forEach(bill => {
+    const displayedBills = filteredBills(bills, getStatus(this.index))
+    displayedBills.forEach(bill => {
       $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
     })
 
