@@ -14,29 +14,29 @@ import router from "../app/Router.js"
 import mockStore from "../__mocks__/store.js"
 
 describe("Given I am connected as an employee", () => {
-  describe("When I am on Bills Page", () => {
-    let billsContainer
+  let billsContainer
 
+  describe("When I am on Bills Page", () => {
     test("Then bill icon in vertical layout should be highlighted", async () => {
       // localStorage simulation
-      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+      Object.defineProperty(window, "localStorage", { value: localStorageMock })
       // connected employee simulation
-      window.localStorage.setItem('user', JSON.stringify({ type: 'Employee' }))
+      window.localStorage.setItem("user", JSON.stringify({ type: "Employee" }))
       // DOM initialization
       const root = document.createElement("div")
       root.setAttribute("id", "root")
+      document.body.innerHTML = ""
       document.body.append(root)
       router()
       // environment simulation
       window.onNavigate(ROUTES_PATH.Bills)
       billsContainer = new Bills({ document, onNavigate, store: mockStore, localStorage: window.localStorage })
 
-      await waitFor(() => screen.getByTestId('icon-window'))
-      const windowIcon = screen.getByTestId('icon-window')
+      await waitFor(() => screen.getByTestId("icon-window"))
+      const windowIcon = screen.getByTestId("icon-window")
 
-      // *** check if class 'active-icon' is correctly affected
-      expect(windowIcon.classList.contains('active-icon')).toBe(true)
-      // **********
+      // check if class "active-icon" is correctly affected
+      expect(windowIcon.classList.contains("active-icon")).toBe(true)
     })
 
     test("Then bills should be ordered from earliest to latest", () => {
@@ -50,9 +50,9 @@ describe("Given I am connected as an employee", () => {
     describe("When I click on new bill button", () => {
       test("Then it should open the new bill form", () => {
         // localStorage simulation
-        Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+        Object.defineProperty(window, "localStorage", { value: localStorageMock })
         // connected employee simulation
-        window.localStorage.setItem('user', JSON.stringify({ type: 'Employee' }))
+        window.localStorage.setItem("user", JSON.stringify({ type: "Employee" }))
         // DOM initialization
         const root = document.createElement("div")
         root.setAttribute("id", "root")
@@ -78,9 +78,9 @@ describe("Given I am connected as an employee", () => {
     describe("When I click on the eye icon to preview a bill", () => {
       test("Then it should open a modal", () => {
         // localStorage simulation
-        Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+        Object.defineProperty(window, "localStorage", { value: localStorageMock })
         // connected employee simulation
-        window.localStorage.setItem('user', JSON.stringify({ type: 'Employee' }))
+        window.localStorage.setItem("user", JSON.stringify({ type: "Employee" }))
         // DOM initialization
         const root = document.createElement("div")
         root.setAttribute("id", "root")
@@ -133,7 +133,7 @@ describe("Given I am connected as an employee", () => {
 
       test("Then it should fetch the list of bills from the mock API", () => {
         // localStorage simulation
-        Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+        Object.defineProperty(window, "localStorage", { value: localStorageMock })
         // connected admin simulation
         localStorage.setItem("user", JSON.stringify({ type: "Admin", email: "a@a" }))
         // DOM initialization
@@ -147,7 +147,7 @@ describe("Given I am connected as an employee", () => {
 
         billsContainer.getBills().then(data => {
           root.innerHTML = BillsUI({ data })
-          expect(document.querySelector('tbody').rows.length).toBeGreaterThan(0)
+          expect(document.querySelector("tbody").rows.length).toBeGreaterThan(0)
         })
       })
     })
@@ -156,9 +156,9 @@ describe("Given I am connected as an employee", () => {
       beforeEach(() => {
         jest.spyOn(mockStore, "bills")
         // localStorage simulation
-        Object.defineProperty( window, 'localStorage', { value: localStorageMock })
+        Object.defineProperty( window, "localStorage", { value: localStorageMock })
         // connected admin simulation
-        window.localStorage.setItem('user', JSON.stringify({ type: 'Admin', email: "a@a" }))
+        window.localStorage.setItem('user', JSON.stringify({ type: "Admin", email: "a@a" }))
         // DOM initialization
         const root = document.createElement("div")
         root.setAttribute("id", "root")
@@ -169,13 +169,13 @@ describe("Given I am connected as an employee", () => {
       })
 
       test("Then it should fail with 404 message error", () => {
-        document.body.innerHTML = BillsUI({ error: 'Erreur 404' })
+        document.body.innerHTML = BillsUI({ error: "Erreur 404" })
         const message = screen.getByText(/Erreur 404/)
         expect(message).toBeTruthy()
       })
 
       test("Then it should fail with 500 message error", () => {
-        document.body.innerHTML = BillsUI({ error: 'Erreur 500' })
+        document.body.innerHTML = BillsUI({ error: "Erreur 500" })
         const message = screen.getByText(/Erreur 500/)
         expect(message).toBeTruthy()
       })
