@@ -4,22 +4,24 @@
 
 import "@testing-library/jest-dom"
 import userEvent from "@testing-library/user-event"
-import {screen, waitFor} from "@testing-library/dom"
+import { screen, waitFor, fireEvent } from "@testing-library/dom"
 import NewBillUI from "../views/NewBillUI.js"
 import NewBill from "../containers/NewBill.js"
-import { ROUTES_PATH} from "../constants/routes.js"
-import {localStorageMock} from "../__mocks__/localStorage.js"
+import { ROUTES_PATH } from "../constants/routes.js"
+import { localStorageMock } from "../__mocks__/localStorage.js"
 
 import router from "../app/Router.js"
 import mockStore from "../__mocks__/store.js"
 
 describe("Given I am connected as an employee", () => {
+  beforeEach(() => {
+    // DOM initialization
+    const html = NewBillUI()
+    document.body.innerHTML = html
+  })
+  
   describe("When I am on NewBill Page", () => {
     test("Then the NewBill form should be rendered", () => {
-      // DOM initialization
-      const html = NewBillUI()
-      document.body.innerHTML = html
-
       expect(screen.getByTestId("form-new-bill")).toBeInTheDocument()
     })
     
@@ -31,6 +33,7 @@ describe("Given I am connected as an employee", () => {
       // DOM initialization
       const root = document.createElement("div")
       root.setAttribute("id", "root")
+      document.body.innerHTML = ""
       document.body.append(root)
       router()
       // environment simulation
@@ -40,15 +43,12 @@ describe("Given I am connected as an employee", () => {
       await waitFor(() => screen.getByTestId("icon-mail"))
       const windowIcon = screen.getByTestId("icon-mail")
 
-      // *** check if class "active-icon" is correctly affected
+      // check if class "active-icon" is correctly affected
       expect(windowIcon.classList.contains("active-icon")).toBe(true)
     })
 
-    describe("When I upload an image in a supported format", () => {
-      test("Then the file should be accepted", () => {
-        // DOM initialization
-        const html = NewBillUI()
-        document.body.innerHTML = html
+    describe("When I upload an image", () => {
+      test("Then the file in a supported format should be accepted", () => {
         // navigation simulation
         const onNavigate = jest.fn()
         const newBill = new NewBill({ document, onNavigate, store: mockStore, localStorage: window.localStorage })
@@ -67,9 +67,6 @@ describe("Given I am connected as an employee", () => {
       })
 
       test("Then an invalid file should be rejected", () => {
-        // DOM initialization
-        const html = NewBillUI()
-        document.body.innerHTML = html
         // navigation simulation
         const onNavigate = jest.fn()
         new NewBill({ document, onNavigate, store: mockStore, localStorage: window.localStorage })
@@ -84,8 +81,26 @@ describe("Given I am connected as an employee", () => {
 
         expect(input.value).toBe("")
       })
+    })
+    
+    describe("When I submit form with empty fields", () => {
+      test("Then it should not navigate away from the NewBill page", () => {
+        // navigation simulation
+        const onNavigate = jest.fn()
+        const newBill = new NewBill({ document, onNavigate, store: mockStore, localStorage: window.localStorage })
 
+        // spy handleSubmit function
+        const handleSubmit = jest.spyOn(newBill, "handleSubmit")
+        // submit simulation
+        const form = screen.getByTestId("form-new-bill")
+        form.addEventListener("submit", handleSubmit)
+        fireEvent.submit(form)
+
+        expect(handleSubmit).toHaveBeenCalled()
+        expect(form).toBeInTheDocument()
+      })
     })
   })
-
 })
+
+// integration test POST

@@ -3,12 +3,12 @@
  */
 
 import "@testing-library/jest-dom"
-import {screen, waitFor, fireEvent} from "@testing-library/dom"
+import { screen, waitFor, fireEvent } from "@testing-library/dom"
 import BillsUI from "../views/BillsUI.js"
 import Bills from "../containers/Bills.js"
 import { bills } from "../fixtures/bills.js"
-import { ROUTES_PATH} from "../constants/routes.js"
-import {localStorageMock} from "../__mocks__/localStorage.js"
+import { ROUTES_PATH } from "../constants/routes.js"
+import { localStorageMock } from "../__mocks__/localStorage.js"
 
 import router from "../app/Router.js"
 import mockStore from "../__mocks__/store.js"
@@ -125,60 +125,60 @@ describe("Given I am connected as an employee", () => {
       })
     })
   })
+})
 
-  // integration test GET
-  describe("Given I am a user connected as Admin", () => {
-    describe("When I navigate to Dashboard", () => {
-      let billsContainer
+// integration test GET
+describe("Given I am a user connected as Admin", () => {
+  describe("When I navigate to Dashboard", () => {
+    let billsContainer
 
-      test("Then it should fetch the list of bills from the mock API", () => {
-        // localStorage simulation
-        Object.defineProperty(window, "localStorage", { value: localStorageMock })
-        // connected admin simulation
-        localStorage.setItem("user", JSON.stringify({ type: "Admin", email: "a@a" }))
-        // DOM initialization
-        const root = document.createElement("div")
-        root.setAttribute("id", "root")
-        document.body.append(root)
-        router()
-        // environment simulation
-        window.onNavigate(ROUTES_PATH.Dashboard)
-        billsContainer = new Bills({ document, onNavigate, store: mockStore, localStorage: window.localStorage })
+    test("Then it should fetch the list of bills from the mock API", () => {
+      // localStorage simulation
+      Object.defineProperty(window, "localStorage", { value: localStorageMock })
+      // connected admin simulation
+      localStorage.setItem("user", JSON.stringify({ type: "Admin", email: "a@a" }))
+      // DOM initialization
+      const root = document.createElement("div")
+      root.setAttribute("id", "root")
+      document.body.append(root)
+      router()
+      // environment simulation
+      window.onNavigate(ROUTES_PATH.Dashboard)
+      billsContainer = new Bills({ document, onNavigate, store: mockStore, localStorage: window.localStorage })
 
-        billsContainer.getBills().then(data => {
-          root.innerHTML = BillsUI({ data })
-          expect(document.querySelector("tbody").rows.length).toBeGreaterThan(0)
-        })
+      billsContainer.getBills().then(data => {
+        root.innerHTML = BillsUI({ data })
+        expect(document.querySelector("tbody").rows.length).toBeGreaterThan(0)
       })
     })
+  })
 
-    describe("When an error occurs on API", () => {
-      beforeEach(() => {
-        jest.spyOn(mockStore, "bills")
-        // localStorage simulation
-        Object.defineProperty( window, "localStorage", { value: localStorageMock })
-        // connected admin simulation
-        window.localStorage.setItem('user', JSON.stringify({ type: "Admin", email: "a@a" }))
-        // DOM initialization
-        const root = document.createElement("div")
-        root.setAttribute("id", "root")
-        document.body.appendChild(root)
-        router()
-        // environment simulation
-        window.onNavigate(ROUTES_PATH.Dashboard)
-      })
+  describe("When an error occurs on API", () => {
+    beforeEach(() => {
+      jest.spyOn(mockStore, "bills")
+      // localStorage simulation
+      Object.defineProperty( window, "localStorage", { value: localStorageMock })
+      // connected admin simulation
+      window.localStorage.setItem('user', JSON.stringify({ type: "Admin", email: "a@a" }))
+      // DOM initialization
+      const root = document.createElement("div")
+      root.setAttribute("id", "root")
+      document.body.appendChild(root)
+      router()
+      // environment simulation
+      window.onNavigate(ROUTES_PATH.Dashboard)
+    })
 
-      test("Then it should fail with 404 message error", () => {
-        document.body.innerHTML = BillsUI({ error: "Erreur 404" })
-        const message = screen.getByText(/Erreur 404/)
-        expect(message).toBeTruthy()
-      })
+    test("Then it should fail with 404 message error", () => {
+      document.body.innerHTML = BillsUI({ error: "Erreur 404" })
+      const message = screen.getByText(/Erreur 404/)
+      expect(message).toBeTruthy()
+    })
 
-      test("Then it should fail with 500 message error", () => {
-        document.body.innerHTML = BillsUI({ error: "Erreur 500" })
-        const message = screen.getByText(/Erreur 500/)
-        expect(message).toBeTruthy()
-      })
+    test("Then it should fail with 500 message error", () => {
+      document.body.innerHTML = BillsUI({ error: "Erreur 500" })
+      const message = screen.getByText(/Erreur 500/)
+      expect(message).toBeTruthy()
     })
   })
 })
