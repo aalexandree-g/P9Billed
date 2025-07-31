@@ -5,10 +5,12 @@
 import "@testing-library/jest-dom"
 import userEvent from "@testing-library/user-event"
 import { screen, waitFor, fireEvent } from "@testing-library/dom"
+import BillsUI from "../views/BillsUI.js"
 import NewBillUI from "../views/NewBillUI.js"
 import NewBill from "../containers/NewBill.js"
-import { ROUTES_PATH } from "../constants/routes.js"
+import { ROUTES_PATH, ROUTES } from "../constants/routes.js"
 import { localStorageMock } from "../__mocks__/localStorage.js"
+import { bills } from "../fixtures/bills.js"
 
 import router from "../app/Router.js"
 import mockStore from "../__mocks__/store.js"
@@ -43,7 +45,6 @@ describe("Given I am connected as an employee", () => {
       await waitFor(() => screen.getByTestId("icon-mail"))
       const windowIcon = screen.getByTestId("icon-mail")
 
-      // check if class "active-icon" is correctly affected
       expect(windowIcon.classList.contains("active-icon")).toBe(true)
     })
 
@@ -104,3 +105,67 @@ describe("Given I am connected as an employee", () => {
 })
 
 // integration test POST
+describe("Given I am a user connected as an employee", () => {
+  describe("When I add a new bill", () => {
+    test("Then it creates a new bill", async () => {
+      // DOM initialization
+      const html = NewBillUI()
+      document.body.innerHTML = html
+      // localStorage simulation
+      Object.defineProperty(window, "localStorage", { value: localStorageMock })
+      // connected employee simulation
+      window.localStorage.setItem("user", JSON.stringify({ type: "Employee" }))
+      // navigation simulation
+      const onNavigate = jest.fn()
+      const newBill = new NewBill({ document, onNavigate, store: mockStore, localStorage: window.localStorage })
+
+      const billData = bills[0]
+      const form = screen.getByTestId("form-new-bill")
+
+      // form fill simulation
+      userEvent.selectOptions(screen.getByTestId("expense-type"), billData.type)
+      fireEvent.change(screen.getByTestId("datepicker"), { target: { value: billData.date } })
+      await userEvent.type(screen.getByTestId("expense-name"), billData.name)
+      await userEvent.type(screen.getByTestId("amount"), billData.amount.toString())
+      await userEvent.type(screen.getByTestId("vat"), billData.vat.toString())
+      await userEvent.type(screen.getByTestId("pct"), billData.pct.toString())
+      await userEvent.type(screen.getByTestId("commentary"), billData.commentary)
+
+      expect(screen.getByTestId("expense-type").value).toBe(billData.type)
+      expect(screen.getByTestId("datepicker").value).toBe(billData.date)
+      expect(screen.getByTestId("expense-name").value).toBe(billData.name)
+      expect(screen.getByTestId("amount").value).toBe(billData.amount.toString())
+      expect(screen.getByTestId("vat").value).toBe(billData.vat.toString())
+      expect(screen.getByTestId("pct").value).toBe(billData.pct.toString())
+      expect(screen.getByTestId("commentary").value).toBe(billData.commentary)
+
+      // upload simulation
+      const file = new File(["content"], "image.jpg", { type: "image/jpg" })
+      const input = screen.getByTestId("file")
+      userEvent.upload(input, file)
+
+      expect(input.files[0]).toStrictEqual(file)
+      expect(input.files).toHaveLength(1)
+
+      // spy handleSubmit function
+      const handleSubmit = jest.fn(newBill.handleSubmit)
+      // upload simulation
+      form.addEventListener('submit', handleSubmit)
+      fireEvent.submit(form)
+
+      expect(handleSubmit).toHaveBeenCalled()
+    })
+
+    test("Then it should fail with 404 message error", () => {
+      document.body.innerHTML = BillsUI({ error: "Erreur 404" })
+      const message = screen.getByText(/Erreur 404/)
+      expect(message).toBeTruthy()
+    })
+
+    test("Then it should fail with 500 message error", () => {
+      document.body.innerHTML = BillsUI({ error: "Erreur 500" })
+      const message = screen.getByText(/Erreur 500/)
+      expect(message).toBeTruthy()
+    })
+  })
+})

@@ -128,7 +128,7 @@ describe("Given I am connected as an employee", () => {
 })
 
 // integration test GET
-describe("Given I am a user connected as Admin", () => {
+describe("Given I am a user connected as an admin", () => {
   describe("When I navigate to Dashboard", () => {
     let billsContainer
 
